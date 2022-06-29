@@ -28,10 +28,22 @@ let persons = [
 
 // Using a predefined format string
 // app.use(morgan("dev"));
-app.use(morgan("tiny"));
+// app.use(morgan("tiny"));
 
 // Activate the json-parser and implement an initial handler for dealing with the HTTP POST requests
 app.use(express.json());
+
+// Configure morgan so that it also shows the data sent in HTTP POST requests:
+morgan.token("data", (request, response) => {
+	return request.data;
+});
+
+app.use((request, response, next) => {
+	request.data = JSON.stringify(request.body);
+	next();
+});
+
+app.use(morgan(`:method :url :res[content-length] - :response-time ms :data`));
 
 // Get main path
 app.get("/", (request, response) => {
