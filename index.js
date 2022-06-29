@@ -1,4 +1,5 @@
 const express = require("express");
+const morgan = require("morgan");
 const app = express();
 const PORT = 3001;
 
@@ -24,6 +25,10 @@ let persons = [
 		number: "39-23-6423122",
 	},
 ];
+
+// Using a predefined format string
+// app.use(morgan("dev"));
+app.use(morgan("tiny"));
 
 // Activate the json-parser and implement an initial handler for dealing with the HTTP POST requests
 app.use(express.json());
