@@ -69,10 +69,17 @@ const generatedId = () => {
 app.post("/api/persons", (request, response) => {
 	const body = request.body;
 	// If the received data is missing a value for the content property, the
-	// server will respond to the request with the status code 400 bad request: 
+	// server will respond to the request with the status code 400 bad request:
 	if (!body.name || !body.number) {
 		return response.status(400).json({
-			error: "content missing"
+			error: "missing name and/or number",
+		});
+	}
+
+	const checkName = persons.find(person => person.name === body.name);
+	if (checkName) {
+		return response.status(400).json({
+			error: "name must be unique",
 		});
 	}
 
@@ -81,7 +88,7 @@ app.post("/api/persons", (request, response) => {
 		name: body.name,
 		number: body.number,
 	};
-	
+
 	persons = persons.concat(person);
 	response.json(person);
 });	
