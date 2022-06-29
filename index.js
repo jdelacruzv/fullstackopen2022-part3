@@ -25,6 +25,9 @@ let persons = [
 	},
 ];
 
+// Activate the json-parser and implement an initial handler for dealing with the HTTP POST requests
+app.use(express.json());
+
 // Get main path
 app.get("/", (request, response) => {
 	response.send("<h1>Home</h1>");
@@ -56,6 +59,32 @@ app.delete("/api/persons/:id", (request, response) => {
 	persons = persons.filter(person => person.id !== id);
 	response.status(204).end();
 });
+
+const generatedId = () => {
+	const newId = Math.floor(Math.random() * 1000000);
+	return newId;
+};
+
+// Create person
+app.post("/api/persons", (request, response) => {
+	const body = request.body;
+	// If the received data is missing a value for the content property, the
+	// server will respond to the request with the status code 400 bad request: 
+	if (!body.name || !body.number) {
+		return response.status(400).json({
+			error: "content missing"
+		});
+	}
+
+	const person = {
+		id: generatedId(),
+		name: body.name,
+		number: body.number,
+	};
+	
+	persons = persons.concat(person);
+	response.json(person);
+});	
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
