@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 const app = express();
 const PORT = 3001;
 
@@ -32,6 +33,8 @@ let persons = [
 
 // Activate the json-parser and implement an initial handler for dealing with the HTTP POST requests
 app.use(express.json());
+
+app.use(cors());
 
 // Configure morgan so that it also shows the data sent in HTTP POST requests:
 morgan.token("data", (request, response) => {
