@@ -50,7 +50,7 @@ app.use(morgan(`:method :url :res[content-length] - :response-time ms :data`));
 
 // Get main path
 app.get("/", (request, response) => {
-	response.send("<h1>Home</h1>");
+	response.send("<h1>Home backend phonebook</h1>");
 });
 
 // Get all persons
