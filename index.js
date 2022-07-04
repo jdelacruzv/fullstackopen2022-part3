@@ -27,10 +27,6 @@ let persons = [
 	},
 ];
 
-// Using a predefined format string
-// app.use(morgan("dev"));
-// app.use(morgan("tiny"));
-
 // Activate the json-parser and implement an initial handler for dealing with the HTTP POST requests
 app.use(express.json());
 
