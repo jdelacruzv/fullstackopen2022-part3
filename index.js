@@ -34,7 +34,11 @@ let persons = [
 // Activate the json-parser and implement an initial handler for dealing with the HTTP POST requests
 app.use(express.json());
 
+// Middleware to use and allow for requests from all origins
 app.use(cors());
+
+// To make express show static content (index.html, style.css and the JavaScript, etc.)
+app.use(express.static("build"));
 
 // Configure morgan so that it also shows the data sent in HTTP POST requests:
 morgan.token("data", (request, response) => {
