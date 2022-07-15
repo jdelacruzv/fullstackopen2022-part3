@@ -1,8 +1,27 @@
 const express = require("express");
 const morgan = require("morgan");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+const url = `mongodb+srv://user-fullstackopen:dArJCo1BqlkhA8RK@cluster0.a3agc.mongodb.net/fullstackopen?retryWrites=true&w=majority`;
+mongoose.connect(url);
+
+const personSchema = new mongoose.Schema({
+	name: String,
+	number: String
+});
+
+personSchema.set("toJSON", {
+	transform: (document, returnedObject) => {
+		returnedObject.id = returnedObject._id.toString();
+		delete returnedObject._id;
+		delete returnedObject.__v;
+	}
+});
+
+const Person = mongoose.model("Person", personSchema);
 
 let persons = [
 	{
@@ -53,19 +72,23 @@ app.get("/", (request, response) => {
 	response.send("<h1>Home backend phonebook</h1>");
 });
 
-// Get all persons
-app.get("/api/persons", (resquest, response) => {
-	response.json(persons);
-});
-
-// Get info and date of persons
+// READ: Get info and date of persons
 app.get("/info", (request, response) => {
 	const result = `Phonebook has info for ${persons.length} people`;
 	const date = new Date().toString();	
 	response.send(`${result} <br><br> ${date}`);
 });
 
-// Get person by id 
+// READ all persons
+app.get("/api/persons", (resquest, response) => {
+	Person
+		.find({})
+		.then(persons => {
+			response.json(persons);
+		});
+});
+
+// READ person by id
 app.get("/api/persons/:id", (request, response) => {
 	const id = Number(request.params.id);
 	const person = persons.find(p => p.id === id);
@@ -73,7 +96,7 @@ app.get("/api/persons/:id", (request, response) => {
 	response.json(person);
 });
 
-// Delete person by id
+// DELETE person by id
 app.delete("/api/persons/:id", (request, response) => {
 	const id = Number(request.params.id);
 	persons = persons.filter(person => person.id !== id);
@@ -85,7 +108,7 @@ const generatedId = () => {
 	return newId;
 };
 
-// Create person
+// CREATE person
 app.post("/api/persons", (request, response) => {
 	const body = request.body;
 	// If the received data is missing a value for the content property, the
