@@ -15,16 +15,16 @@ if (process.argv.length < 3) {
 	process.exit(1);
 }
 
-// Define el Schema (como seran almacenados los datos en la bd)
+// Define the Schema (how the data will be stored in the database)
 const personSchema = new mongoose.Schema({
 	name: String,
 	number: String
 });
 
-// Define el modelo ( Schema compilado)
+// Define the model (compiled Schema)
 const Person = mongoose.model("Person", personSchema);
 
-// DB connection
+// Database connection
 mongoose.connect(url);
 
 if (process.argv.length === 3) {

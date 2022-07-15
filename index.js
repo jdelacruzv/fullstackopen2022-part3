@@ -1,27 +1,10 @@
+require("dotenv").config();
 const express = require("express");
-const morgan = require("morgan");
-const mongoose = require("mongoose");
-const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 3001;
-
-const url = `mongodb+srv://user-fullstackopen:dArJCo1BqlkhA8RK@cluster0.a3agc.mongodb.net/fullstackopen?retryWrites=true&w=majority`;
-mongoose.connect(url);
-
-const personSchema = new mongoose.Schema({
-	name: String,
-	number: String
-});
-
-personSchema.set("toJSON", {
-	transform: (document, returnedObject) => {
-		returnedObject.id = returnedObject._id.toString();
-		delete returnedObject._id;
-		delete returnedObject.__v;
-	}
-});
-
-const Person = mongoose.model("Person", personSchema);
+const morgan = require("morgan");
+const cors = require("cors");
+const PORT = process.env.PORT;
+const Person = require("./models/person")
 
 let persons = [
 	{
@@ -72,14 +55,43 @@ app.get("/", (request, response) => {
 	response.send("<h1>Home backend phonebook</h1>");
 });
 
-// READ: Get info and date of persons
+// Get info and date of persons
 app.get("/info", (request, response) => {
 	const result = `Phonebook has info for ${persons.length} people`;
 	const date = new Date().toString();	
 	response.send(`${result} <br><br> ${date}`);
 });
 
-// READ all persons
+// Create person
+app.post("/api/persons", (request, response) => {
+	const body = request.body;
+	
+	if (!body.name || !body.number) {
+		return response.status(400).json({
+			error: "missing name and/or number",
+		});
+	}
+
+	// const checkName = persons.find((person) => person.name === body.name);
+	// if (checkName) {
+	// 	return response.status(400).json({
+	// 		error: "name must be unique",
+	// 	});
+	// }
+
+	const person = new Person ({
+		name: body.name,
+		number: body.number,
+	});
+
+	person
+		.save()
+		.then(savedPerson => {
+			response.json(savedPerson);
+		});
+});	
+
+// Read all persons
 app.get("/api/persons", (resquest, response) => {
 	Person
 		.find({})
@@ -88,53 +100,21 @@ app.get("/api/persons", (resquest, response) => {
 		});
 });
 
-// READ person by id
+// Read person by id
 app.get("/api/persons/:id", (request, response) => {
-	const id = Number(request.params.id);
-	const person = persons.find(p => p.id === id);
-	if (!person) return response.status(404).end();
-	response.json(person);
+	Person
+		.findById(request.params.id)
+		.then(person => {
+			response.json(person);
+		});
 });
 
-// DELETE person by id
+// Delete person by id
 app.delete("/api/persons/:id", (request, response) => {
 	const id = Number(request.params.id);
 	persons = persons.filter(person => person.id !== id);
 	response.status(204).end();
 });
-
-const generatedId = () => {
-	const newId = Math.floor(Math.random() * 1000000);
-	return newId;
-};
-
-// CREATE person
-app.post("/api/persons", (request, response) => {
-	const body = request.body;
-	// If the received data is missing a value for the content property, the
-	// server will respond to the request with the status code 400 bad request:
-	if (!body.name || !body.number) {
-		return response.status(400).json({
-			error: "missing name and/or number",
-		});
-	}
-
-	const checkName = persons.find(person => person.name === body.name);
-	if (checkName) {
-		return response.status(400).json({
-			error: "name must be unique",
-		});
-	}
-
-	const person = {
-		id: generatedId(),
-		name: body.name,
-		number: body.number,
-	};
-
-	persons = persons.concat(person);
-	response.json(person);
-});	
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
