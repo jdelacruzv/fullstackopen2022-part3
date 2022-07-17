@@ -35,9 +35,12 @@ app.get("/", (request, response) => {
 
 // Get info and date of persons
 app.get("/info", (request, response) => {
-	const result = `Phonebook has info for ${persons.length} people`;
-	const date = new Date().toString();	
-	response.send(`${result} <br><br> ${date}`);
+	Person.countDocuments()
+		.then(docsCount => {
+			const result = `Phonebook has info for ${docsCount} people`;
+			const date = new Date().toString();	
+			response.send(`${result} <br><br> ${date}`);
+		});
 });
 
 // Create person
@@ -51,12 +54,12 @@ app.post("/api/persons", (request, response) => {
 		});
 	}
 
-	const checkName = persons.find((person) => person.name === body.name);
-	if (checkName) {
-		return response.status(400).json({
-			error: "name must be unique",
-		});
-	}
+	// const checkName = persons.find((person) => person.name === body.name);
+	// if (checkName) {
+	// 	return response.status(400).json({
+	// 		error: "name must be unique",
+	// 	});
+	// }
 
 	const person = new Person ({
 		name: body.name,
