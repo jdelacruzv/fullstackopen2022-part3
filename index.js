@@ -5,7 +5,7 @@ require("dotenv").config();
 const cors = require("cors");
 const morgan = require("morgan");
 const PORT = process.env.PORT;
-const Person = require("./models/person")
+const Person = require("./models/person");
 
 // Configure morgan so that it also shows the data sent in HTTP POST requests:
 morgan.token("data", (request, response) => {
@@ -51,12 +51,12 @@ app.post("/api/persons", (request, response) => {
 		});
 	}
 
-	// const checkName = persons.find((person) => person.name === body.name);
-	// if (checkName) {
-	// 	return response.status(400).json({
-	// 		error: "name must be unique",
-	// 	});
-	// }
+	const checkName = persons.find((person) => person.name === body.name);
+	if (checkName) {
+		return response.status(400).json({
+			error: "name must be unique",
+		});
+	}
 
 	const person = new Person ({
 		name: body.name,
@@ -90,6 +90,22 @@ app.get("/api/persons/:id", (request, response) => {
 				// 404 not found
 				response.status(404).end();
 			}
+		})
+		.catch(error => next(error));
+});
+
+// Update person by id
+app.put("/api/persons/:id", (request, response, next) => {
+	const body = request.body;
+
+	const person = {
+		name: body.name,
+		number: body.number
+	};
+
+	Person.findByIdAndUpdate(request.params.id, person, { new: true})
+		.then(updatedPerson => {
+			response.json(updatedPerson);
 		})
 		.catch(error => next(error));
 });
