@@ -44,23 +44,9 @@ app.get("/info", (request, response) => {
 });
 
 // Create person
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
 	const body = request.body;
 	
-	if (!body.name || !body.number) {
-		// 400 bad request
-		return response.status(400).json({
-			error: "missing name and/or number",
-		});
-	}
-
-	// const checkName = persons.find((person) => person.name === body.name);
-	// if (checkName) {
-	// 	return response.status(400).json({
-	// 		error: "name must be unique",
-	// 	});
-	// }
-
 	const person = new Person ({
 		name: body.name,
 		number: body.number,
@@ -70,7 +56,8 @@ app.post("/api/persons", (request, response) => {
 		.save()
 		.then(savedPerson => {
 			response.json(savedPerson);
-		});
+		})
+		.catch(error => next(error));
 });	
 
 // Read all persons
@@ -99,18 +86,19 @@ app.get("/api/persons/:id", (request, response) => {
 
 // Update person by id
 app.put("/api/persons/:id", (request, response, next) => {
-	const body = request.body;
+	const { name, number } = request.body;
 
-	const person = {
-		name: body.name,
-		number: body.number
-	};
-
-	Person.findByIdAndUpdate(request.params.id, person, { new: true})
-		.then(updatedPerson => {
+	// We added the optional { new: true } parameter, which will cause our event
+	// handler to be called with the new modified document instead of the original
+	Person.findByIdAndUpdate(
+		request.params.id,
+		{ name, number },
+		{ new: true, runValidators: true, context: "query" }
+	)
+		.then((updatedPerson) => {
 			response.json(updatedPerson);
 		})
-		.catch(error => next(error));
+		.catch((error) => next(error));
 });
 
 // Delete person by id
@@ -130,6 +118,10 @@ const errorHandler = (error, request, response, next) => {
 	// If the error was caused by an invalid object id for Mongo.
 	if (error.name === "CastError") {
 		return response.status(400).send({ error: "formatted id" });
+	}
+	// If the error was caused by validation errors
+	else if (error.name === "ValidationError") {
+		return response.status(400).json({ error: error.message });
 	}
 
 	// Middleware passes the error forward to the default Express error handler

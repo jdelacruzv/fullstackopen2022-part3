@@ -13,8 +13,16 @@ mongoose.connect(url)
 
 // Define the Schema (how the data will be stored in the database)
 const personSchema = new mongoose.Schema({
-	name: String,
-	number: String,
+	// Define specific validation rules for each field
+	name: {
+		type: String,
+		minLength: [3, "Name must have at least 3 characters"],
+		required: [true, "Why no name?"]
+	},
+	number: {
+		type: String,
+		required: [true, "Why no number?"]
+	},
 });
 
 // Modify the schema so that the _id property comes in "id" format
