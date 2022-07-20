@@ -1,3 +1,5 @@
-# Phonebook backend 
+# App phonebook
 
-You can check the backend of the app phonebook: https://serene-death-valley-25613.herokuapp.com/api/persons
+- You can check the **frontend** of the app: https://app-persons.herokuapp.com
+
+- You can check the **backend** of the app: https://app-persons.herokuapp.com/api/persons
