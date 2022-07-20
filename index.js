@@ -28,19 +28,15 @@ app.use(express.json());
 // Middleware to use and allow for requests from all origins
 app.use(cors());
 
-// Get main path
-app.get("/", (request, response) => {
-	response.send("<h1>Home backend phonebook</h1>");
-});
-
 // Get info and date of persons
 app.get("/info", (request, response) => {
 	Person.countDocuments()
 		.then(docsCount => {
-			const result = `Phonebook has info for ${docsCount} people`;
-			const date = new Date().toString();	
+			const result = `Phonebook has info for ${docsCount} contacts`;
+			const date = new Date();	
 			response.send(`${result} <br><br> ${date}`);
-		});
+		})
+		.catch(error => console.error(error));
 });
 
 // Create person
@@ -65,12 +61,19 @@ app.get("/api/persons", (resquest, response) => {
 	Person
 		.find({})
 		.then(persons => {
-			response.json(persons);
-		});
+			if (!persons.length) {
+				response.status(204).json({ 
+					error: "Content is not available" 
+				});
+			} else {
+				response.json(persons);
+			}
+		})
+		.catch(error => console.error(error));
 });
 
 // Read person by id
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
 	Person
 		.findById(request.params.id)
 		.then(person => {
@@ -96,7 +99,13 @@ app.put("/api/persons/:id", (request, response, next) => {
 		{ new: true, runValidators: true, context: "query" }
 	)
 		.then((updatedPerson) => {
-			response.json(updatedPerson);
+			if (updatedPerson) {
+				response.json(updatedPerson);
+			} else {
+				response.status(404).send({ 
+					error: "Could not find entry with the id provided"
+				});
+			}
 		})
 		.catch((error) => next(error));
 });
@@ -110,6 +119,16 @@ app.delete("/api/persons/:id", (request, response, next) => {
 		})
 		.catch(error => next(error));
 });
+
+// Unknown endpoint routes
+const unknownEndPoint = (request, response) => {
+	response.status(404).send({ 
+		error: "unknown endpoint"
+	});
+};
+
+// Handler of requests with unknown endpoint
+app.use(unknownEndPoint);
 
 // Set error handling into middleware
 const errorHandler = (error, request, response, next) => {

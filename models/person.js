@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 const url = process.env.MONGODB_URI;
 console.log("connecting to", url);
 
@@ -17,13 +18,23 @@ const personSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		minLength: [3, "Name must have at least 3 characters"],
-		required: [true, "Why no name?"]
+		required: [true, "Username required"],
+		unique: true
 	},
 	number: {
 		type: String,
-		required: [true, "Why no number?"]
+		minLength: [8, "Number must have at least 8 characters"],
+		validate: {
+			validator: (val) => {
+				return /^\d{2,3}-\d+$/.test(val);
+			},
+			message: (props) => `${props.value} is not a valid phone number!`
+		},
+		required: [true, "User's phone number is required"],
 	},
 });
+
+personSchema.plugin(uniqueValidator);
 
 // Modify the schema so that the _id property comes in "id" format
 // Remove _id and __v properties (mongo version control)
