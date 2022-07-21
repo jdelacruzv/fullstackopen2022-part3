@@ -10,7 +10,7 @@ mongoose.connect(url)
 	})
 	.catch(error => {
 		console.log("Error connecting to MongoDB", error.message);
-	})
+	});
 
 // Define the Schema (how the data will be stored in the database)
 const personSchema = new mongoose.Schema({

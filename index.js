@@ -17,7 +17,7 @@ app.use((request, response, next) => {
 	next();
 });
 
-app.use(morgan(`:method :url :res[content-length] - :response-time ms :data`));
+app.use(morgan(":method :url :res[content-length] - :response-time ms :data"));
 
 // To make express show static content (index.html, style.css and the JavaScript, etc.)
 app.use(express.static("build"));
@@ -33,7 +33,7 @@ app.get("/info", (request, response) => {
 	Person.countDocuments()
 		.then(docsCount => {
 			const result = `Phonebook has info for ${docsCount} contacts`;
-			const date = new Date();	
+			const date = new Date();
 			response.send(`${result} <br><br> ${date}`);
 		})
 		.catch(error => console.error(error));
@@ -42,7 +42,7 @@ app.get("/info", (request, response) => {
 // Create person
 app.post("/api/persons", (request, response, next) => {
 	const body = request.body;
-	
+
 	const person = new Person ({
 		name: body.name,
 		number: body.number,
@@ -54,7 +54,7 @@ app.post("/api/persons", (request, response, next) => {
 			response.json(savedPerson);
 		})
 		.catch(error => next(error));
-});	
+});
 
 // Read all persons
 app.get("/api/persons", (resquest, response) => {
@@ -62,8 +62,8 @@ app.get("/api/persons", (resquest, response) => {
 		.find({})
 		.then(persons => {
 			if (!persons.length) {
-				response.status(204).json({ 
-					error: "Content is not available" 
+				response.status(204).json({
+					error: "Content is not available"
 				});
 			} else {
 				response.json(persons);
@@ -102,7 +102,7 @@ app.put("/api/persons/:id", (request, response, next) => {
 			if (updatedPerson) {
 				response.json(updatedPerson);
 			} else {
-				response.status(404).send({ 
+				response.status(404).send({
 					error: "Could not find entry with the id provided"
 				});
 			}
@@ -122,7 +122,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
 
 // Unknown endpoint routes
 const unknownEndPoint = (request, response) => {
-	response.status(404).send({ 
+	response.status(404).send({
 		error: "unknown endpoint"
 	});
 };
